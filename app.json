@@ -59,6 +59,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "ea1541a2-9370-4adb-8c55-e03fde554821"
+      }
+    },
+    "owner": "ashikamishra"
   }
 }
