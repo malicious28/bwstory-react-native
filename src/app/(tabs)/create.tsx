@@ -1,24 +1,12 @@
-import { StyleSheet, View } from 'react-native';
-
-import { AppHeader, AppText, EmptyState } from '@/components/ui';
-import { colors } from '@/theme';
+import { PlaceholderScreen } from '@/components/ui';
 
 export default function CreateScreen() {
   return (
-    <View style={styles.screen}>
-      <AppHeader
-        center={
-          <AppText variant="heading" color="textInverse" accessibilityRole="header" style={styles.title}>
-            Create story
-          </AppText>
-        }
-      />
-      <EmptyState icon="videocam-outline" title="Share a story" message="Recording and posting stories is coming soon." />
-    </View>
+    <PlaceholderScreen
+      title="Create"
+      icon="videocam-outline"
+      heading="Share a story"
+      message="Recording and posting stories is coming soon."
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.background },
-  title: { textAlign: 'center' },
-});

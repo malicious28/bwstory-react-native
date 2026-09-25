@@ -33,6 +33,20 @@ export function formatStoryDate(iso: string): string {
   return `${ordinal(date.getDate())} ${MONTHS[date.getMonth()]}`;
 }
 
+/** "just now", "12m ago", "12h ago", "3d ago", else "7th July". */
+export function formatRelative(iso: string, now: number = Date.now()): string {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return '';
+  const mins = Math.floor((now - t) / 60000);
+  if (mins < 1) return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return formatStoryDate(iso);
+}
+
 export function countWords(text: string): number {
   const trimmed = text.trim();
   return trimmed ? trimmed.split(/\s+/).length : 0;

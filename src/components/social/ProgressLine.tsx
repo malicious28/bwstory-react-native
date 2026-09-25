@@ -2,10 +2,8 @@ import { StyleSheet, View } from 'react-native';
 
 import { colors } from '@/theme';
 
-type Props = { progress: number };
-
-/** Thin red scrub line along the bottom edge of the video (display only). */
-export function VideoProgressBar({ progress }: Props) {
+/** Thin white playback line for the full-screen player. */
+export function ProgressLine({ progress }: { progress: number }) {
   const pct = Math.min(1, Math.max(0, Number.isFinite(progress) ? progress : 0)) * 100;
   return (
     <View
@@ -21,6 +19,6 @@ export function VideoProgressBar({ progress }: Props) {
 }
 
 const styles = StyleSheet.create({
-  track: { height: 4, backgroundColor: 'rgba(255,255,255,0.35)' },
-  fill: { height: 4, backgroundColor: colors.accent },
+  track: { height: 3, borderRadius: 2, backgroundColor: 'rgba(255,255,255,0.35)' },
+  fill: { height: 3, borderRadius: 2, backgroundColor: colors.onBrand },
 });
