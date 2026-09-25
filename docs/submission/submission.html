@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BWStory · Discover &amp; Profile · Ashika Mishra</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&amp;family=Figtree:wght@400;500;600;700&amp;display=swap">
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 400 10.5pt/1.55 Figtree, system-ui, sans-serif; color: #14212a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  h1, h2 { font-family: 'DM Serif Display', Georgia, serif; font-weight: 400; color: #143442; margin: 0; }
+  h1 { font-size: 30pt; line-height: 1.05; }
+  h2 { font-size: 17pt; margin: 22px 0 8px; padding-top: 6px; border-top: 1.5px solid #143442; }
+  h3 { font-size: 11pt; margin: 14px 0 4px; color: #143442; }
+  p { margin: 0 0 8px; }
+  ul, ol { margin: 0 0 8px; padding-left: 18px; }
+  li { margin-bottom: 4px; }
+  .cover { background: #143442; color: #fff; border-radius: 14px; padding: 26px 28px; margin-bottom: 18px; }
+  .cover h1 { color: #fff; }
+  .cover .sub { color: #c9d6db; font-size: 11.5pt; margin-top: 6px; }
+  .links { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; align-items: center; margin-top: 18px; font-size: 10pt; }
+  .links b { color: #9fc3cf; font-weight: 600; }
+  .ph { background: #fff4d6; color: #7a4a00; padding: 0 5px; border-radius: 4px; font-weight: 600; }
+  .cover .ph { background: #ffe7a8; justify-self: start; }
+  .box { border: 1px solid #d9e1e5; border-radius: 10px; padding: 12px 14px; margin: 8px 0 10px; background: #f7fafb; }
+  .steps li { margin-bottom: 6px; }
+  code { font-family: Consolas, monospace; font-size: 9.5pt; background: #eef2f4; padding: 1px 5px; border-radius: 4px; }
+  pre { font-family: Consolas, monospace; font-size: 9.2pt; background: #0d1d24; color: #e8eef0; padding: 10px 12px; border-radius: 8px; margin: 6px 0 10px; white-space: pre-wrap; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 10px; font-size: 9.8pt; }
+  th, td { text-align: left; vertical-align: top; padding: 6px 8px; border-bottom: 1px solid #e1e6e9; }
+  th { color: #143442; font-weight: 700; background: #f2f6f7; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .muted { color: #55636c; }
+  .break { break-before: page; }
+  .foot { margin-top: 18px; font-size: 9pt; color: #66747c; border-top: 1px solid #e1e6e9; padding-top: 8px; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <h1>BWStory: Discover &amp; Profile</h1>
+  <p class="sub">Test assignment · React Native (Expo) · Android APK</p>
+  <p class="sub">Ashika Mishra · ashikamishra63@gmail.com · +91 81090 55298</p>
+  <div class="links">
+    <b>Android app (APK)</b><span class="ph">[Google Drive link to the APK]</span>
+    <b>Source code</b><span class="ph">[GitHub repository link]</span>
+    <b>Screen recording</b><span class="ph">[Google Drive link to the video]</span>
+    <b>Portfolio</b><span class="ph">[Portfolio link]</span>
+  </div>
+</section>
+
+<h2>1. What I built</h2>
+<p>The brief asked for two screens based on the BWStory app: <b>Discover</b> and <b>Profile</b>. I kept BWStory’s brand colour (deep navy, <code>#143442</code>) and redesigned the screens as a modern short-video news experience. Tapping through the Discover screen leads to two follow-on pages, so the flow feels like a real app:</p>
+<table>
+  <tr><th style="width:32%">Screen</th><th>What you can do</th></tr>
+  <tr><td><b>Discover</b> (the feed)</td><td>Scroll a feed of short news videos. The video most in view plays silently as a preview. Like, comment, share or save a story, and tap a circle at the top to open a reporter’s latest story.</td></tr>
+  <tr><td><b>Full-screen video</b></td><td>Watch with sound, and tap to pause. Like, save or share from the side bar, read the full summary, follow the reporter, write a comment, or jump to the next story.</td></tr>
+  <tr><td><b>Reporter profile</b></td><td>See the reporter’s photo, bio, follower numbers and all their stories. Follow them, and the count updates straight away.</td></tr>
+  <tr><td><b>Your profile</b></td><td>The same layout, showing your own photo, bio, profession and location.</td></tr>
+  <tr><td><b>Edit profile</b> (Update Account)</td><td>Change your photo, name, gender, profession, location and bio. Mistakes are pointed out under the field, the bio has a live word counter, and the app asks before throwing away unsaved changes.</td></tr>
+</table>
+<p class="muted">Search, Create and Stories are placeholder tabs, as the brief covers only Discover and Profile. People, headlines and numbers are sample content; the videos are free public test clips.</p>
+
+<h2>2. How to install the app (Android)</h2>
+<ol class="steps">
+  <li>On your Android phone, open the <b>APK link</b> above and download <code>BWStory.apk</code>.</li>
+  <li>Open the downloaded file. If Android says installs from this source aren’t allowed, tap <b>Settings</b> and turn on <b>Allow from this source</b> for your browser or Files app, then go back.</li>
+  <li>Tap <b>Install</b>. If Google Play Protect shows a warning, tap <b>More details → Install anyway</b>. This appears because the app isn’t on the Play Store yet.</li>
+  <li>Open <b>BWStory</b> from your app list. You need an internet connection for the videos.</li>
+</ol>
+<div class="box">To remove it later, press and hold the app icon and tap <b>Uninstall</b>. The app asks for <b>no permissions</b> at install time. Choosing a profile photo uses Android’s built-in photo picker, which doesn’t need storage access.</div>
+
+<h2>3. How to run the source code (for developers)</h2>
+<p>You need <b>Node.js 20 or newer</b> and the free <b>Expo Go</b> app on a phone.</p>
+<pre>git clone [GitHub repository link]
+cd react-native-
+npm install
+npx expo start        # scan the QR code with Expo Go</pre>
+<p>To build the APK yourself:</p>
+<pre>npx eas-cli login
+npx eas-cli build -p android --profile preview</pre>
+<p class="muted">Checks: <code>npm run typecheck</code> and <code>npm run lint</code>. The v3 design lives on the branch <code>design/v3-social</code>. The first version, which copies BWStory’s layout closely, is kept at the tag <code>v1-classic</code>.</p>
+
+<h2>4. How it’s built</h2>
+<div class="two">
+  <div>
+    <h3>Technology</h3>
+    <ul>
+      <li>Expo SDK 57, React Native, TypeScript</li>
+      <li>Expo Router for screens and links</li>
+      <li>expo-video for playback, expo-image for fast cached images</li>
+      <li>Data saved on the phone (no server needed for this brief)</li>
+    </ul>
+  </div>
+  <div>
+    <h3>How the code is organised</h3>
+    <ul>
+      <li>Every piece is its own small, reusable component</li>
+      <li>One shared set of colours, fonts and spacing</li>
+      <li>Work done on separate branches, one per feature</li>
+    </ul>
+  </div>
+</div>
+<h3>Safety and privacy</h3>
+<ul>
+  <li>The app blocks camera, microphone and storage permissions it doesn’t need, and Android cloud backup of app data is off.</li>
+  <li>Everything typed into the profile is cleaned (hidden and look-alike characters are removed) and checked for length and allowed characters.</li>
+  <li>Saved data is re-checked when the app opens, so damaged data can’t crash it.</li>
+  <li>Videos load only over secure HTTPS from an approved list of sources, and links that open a story or profile accept only known IDs.</li>
+</ul>
+
+<h2 class="break">5. How we can improve it</h2>
+
+<h3>5.1 A personal feed for every user, using AI</h3>
+<p><b>The idea:</b> instead of everyone seeing the same list, each person sees the stories they’re most likely to care about, while still being shown important news and new topics.</p>
+<p><b>Step 1: learn what each story is about.</b> When a reporter uploads a story, an AI model reads the headline, the summary and the spoken words (turned into text automatically). It adds topic tags (for example “Metro”, “Weather”, “Startups”), the place, and a short summary. It also produces a <i>fingerprint</i> of the story’s meaning, a list of numbers called an <i>embedding</i>, so stories about similar things can be found even when they use different words.</p>
+<p><b>Step 2: learn what each person likes, from what they do.</b> The app notes simple signals: how much of a video someone watches, whether they skip it quickly, likes, saves, shares, comments, who they follow, the area they’re in and the time of day. Watching to the end counts for much more than a quick scroll past. From this, each person gets their own “taste fingerprint” that keeps updating as they use the app.</p>
+<p><b>Step 3: build the feed in three passes.</b></p>
+<ol>
+  <li><b>Collect</b> a few hundred candidate stories: from people you follow, from your area, trending now, and similar to what you enjoyed.</li>
+  <li><b>Score</b> each one by how well it matches your taste, how fresh it is and how trusted the reporter is.</li>
+  <li><b>Mix</b> the final list, so it isn’t ten stories on one topic. Always include important local news, and keep about one in ten stories new to you, so the feed doesn’t get stuck in a bubble.</li>
+</ol>
+<p><b>New users:</b> ask them to pick 3–5 topics and their city when they first open the app, and show popular local stories until the app has learned more.</p>
+<p><b>Keeping it fair and private:</b> add a “Why am I seeing this?” note and buttons for <i>Show more like this</i> / <i>Show less</i>, let people reset their history, never guess sensitive traits (religion, health, politics), and give verified and fact-checked news priority.</p>
+<p><b>Measuring success:</b> test changes on a small group first (an A/B test) and look at whether people watch stories to the end and come back the next day, not just at clicks.</p>
+<p><b>Other helpful AI features:</b> automatic Hindi and English captions and translations, a one-line summary on every video, spotting duplicate or misleading uploads, and suggesting a headline to reporters as they post.</p>
+<p class="muted"><b>Possible tools:</b> Supabase (PostgreSQL with the pgvector add-on) to store and search story fingerprints, an embedding model and a speech-to-text model for step 1, and a small server that builds each person’s feed. Start with simple rules, then move to a trained ranking model as data grows.</p>
+
+<h3>5.2 Making the app load and respond faster</h3>
+<table>
+  <tr><th style="width:30%">Area</th><th>What to do, and why it helps</th></tr>
+  <tr><td><b>Videos start instantly</b></td><td>Stream videos in small pieces at several quality levels (called <i>HLS</i>), so playback starts at once and adjusts to the network. Load the first couple of seconds of the <i>next</i> video while the current one plays, and serve all videos from a CDN (servers close to the user).</td></tr>
+  <tr><td><b>Images appear immediately</b></td><td>Show a tiny blurred preview first and then the sharp image. Serve images in the exact size the screen needs, in modern formats (WebP/AVIF). Caching is already on (expo-image).</td></tr>
+  <tr><td><b>Smooth scrolling</b></td><td>Switch the feed list to <i>FlashList</i>, which reuses screen items instead of creating new ones. Load stories in pages of 10 as the user scrolls, and keep at most one or two video players alive at a time (already done).</td></tr>
+  <tr><td><b>Fast app start</b></td><td>Show the last loaded feed from the phone straight away, then refresh it quietly in the background. Load rarely used screens only when they’re opened, and trim the fonts and code shipped in the app.</td></tr>
+  <tr><td><b>Instant reactions</b></td><td>Update likes, follows and saves on screen before the server replies, undoing only if it fails (partly done). Run animations on the phone’s graphics thread (Reanimated), and add small haptic taps (already done).</td></tr>
+  <tr><td><b>Slow networks</b></td><td>Add a low-data mode (lower video quality, no auto-preview), queue actions made offline and send them when the connection returns, and show placeholder shapes (skeletons) instead of blank space while loading.</td></tr>
+  <tr><td><b>Measure, don’t guess</b></td><td>Track app start time, time until the first video frame, and dropped frames with a monitoring tool (for example Sentry), and set targets such as “first video plays in under 1 second on 4G”.</td></tr>
+</table>
+
+<h3>5.3 Other next steps</h3>
+<ul>
+  <li><b>Real accounts and data:</b> sign-in, stories, likes and comments stored in Supabase or Firebase, with video storage.</li>
+  <li><b>Posting stories:</b> record or upload from the Create tab, with trimming and captions.</li>
+  <li><b>Comments, notifications and search</b> as full features.</li>
+  <li><b>Hindi and other Indian languages</b> across the app.</li>
+  <li><b>Automated tests</b> for components and full user journeys, run on every change, plus crash reporting.</li>
+  <li><b>An iPhone version</b> through TestFlight (needs an Apple Developer account).</li>
+</ul>
+
+<h2>6. Known limitations</h2>
+<ul>
+  <li>Sample content and public test videos, with no server yet. Likes, follows and comments are kept only while the app is open; the profile is saved on the phone.</li>
+  <li>Tested on an Android phone. An iPhone build was not produced, as the brief asks for an APK.</li>
+</ul>
+
+<p class="foot">Thank you for reviewing my submission. Ashika Mishra · ashikamishra63@gmail.com · github.com/malicious28</p>
+</body>
+</html>
