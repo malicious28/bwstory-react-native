@@ -66,16 +66,7 @@ export default function DiscoverFeed() {
 
   const soon = useCallback((what: string) => () => toast(`${what} are coming soon`), [toast]);
   const onComment = useMemo(() => soon('Comments'), [soon]);
-  const onReact = useMemo(() => soon('Reactions'), [soon]);
   const onMore = useMemo(() => soon('Post options'), [soon]);
-
-  const likedByFor = useCallback(
-    (story: Story) => {
-      const others = Object.values(AUTHORS).filter((a) => a.id !== story.authorId);
-      return [...others.filter((a) => social.isFollowing(a.id)), ...others.filter((a) => !social.isFollowing(a.id))].slice(0, 3);
-    },
-    [social],
-  );
 
   const renderItem = useCallback(
     ({ item }: { item: Story }) => (
@@ -83,17 +74,17 @@ export default function DiscoverFeed() {
         story={item}
         active={isFocused && item.id === activeId}
         liked={social.isLiked(item.id)}
-        likedBy={likedByFor(item)}
+        saved={social.isSaved(item.id)}
         onOpen={openStory}
         onOpenAuthor={openAuthor}
         onToggleLike={social.toggleLike}
+        onToggleSave={social.toggleSave}
         onComment={onComment}
         onShare={share}
-        onReact={onReact}
         onMore={onMore}
       />
     ),
-    [isFocused, activeId, social, likedByFor, openStory, openAuthor, onComment, share, onReact, onMore],
+    [isFocused, activeId, social, openStory, openAuthor, onComment, share, onMore],
   );
 
   const refresh = () => {
@@ -138,5 +129,5 @@ function Separator() {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: colors.background },
   list: { paddingBottom: TAB_BAR_CLEARANCE },
-  separator: { height: spacing.xxl },
+  separator: { height: spacing.xxxl },
 });

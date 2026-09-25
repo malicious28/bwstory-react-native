@@ -41,6 +41,10 @@ export const colors = {
   /** Translucent controls over photos and video. */
   glass: 'rgba(255,255,255,0.24)',
   glassLight: 'rgba(255,255,255,0.82)',
+  /** Dark see-through surface for white icons over photos (readable on bright and dark images). */
+  glassShade: 'rgba(10,22,28,0.46)',
+  glassShadeBorder: 'rgba(255,255,255,0.18)',
+  likeOnDark: '#FF5A60',
   mediaScrim: 'rgba(12,26,33,0.6)',
 
   media: '#1C2A31',

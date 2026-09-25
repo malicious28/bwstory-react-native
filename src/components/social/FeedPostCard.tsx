@@ -6,9 +6,8 @@ import { AppText, Avatar, GlassButton, type IoniconName } from '@/components/ui'
 import { getAuthor } from '@/data/authors';
 import type { Author, Story } from '@/data/types';
 import { formatCount, formatRelative } from '@/lib/format';
-import { colors, fonts, hitTarget, radius, spacing } from '@/theme';
+import { colors, fonts, radius, spacing } from '@/theme';
 
-import { AvatarStack } from './AvatarStack';
 import { FeedMedia } from './FeedMedia';
 import { VerifiedBadge } from './VerifiedBadge';
 
@@ -16,49 +15,59 @@ type Props = {
   story: Story;
   active: boolean;
   liked: boolean;
-  /** People the viewer follows who liked this post (for the social proof row). */
-  likedBy: Author[];
+  saved: boolean;
   onOpen: (story: Story) => void;
   onOpenAuthor: (authorId: string) => void;
   onToggleLike: (storyId: string) => void;
+  onToggleSave: (storyId: string) => void;
   onComment: (story: Story) => void;
   onShare: (story: Story) => void;
-  onReact: (story: Story) => void;
   onMore: (story: Story) => void;
 };
 
-function NotchAction({ icon, label, color = colors.text, onPress, selected }: {
+/** One icon (+ optional count) inside the see-through action pill. */
+function PillAction({ icon, label, count, color = colors.onBrand, selected, onPress }: {
   icon: IoniconName;
   label: string;
+  count?: number;
   color?: string;
-  onPress: () => void;
   selected?: boolean;
+  onPress: () => void;
 }) {
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={label}
+      accessibilityLabel={count != null ? `${label}, ${formatCount(count)}` : label}
       accessibilityState={selected != null ? { selected } : undefined}
       onPress={onPress}
-      style={({ pressed }) => [styles.notchBtn, pressed && styles.pressed]}
+      hitSlop={{ top: 4, bottom: 4 }}
+      style={({ pressed }) => [styles.pillAction, pressed && styles.pressed]}
     >
-      <Ionicons name={icon} size={26} color={color} />
+      <Ionicons name={icon} size={22} color={color} />
+      {count != null ? (
+        <AppText variant="label" color="textInverse" allowFontScaling={false}>
+          {formatCount(count)}
+        </AppText>
+      ) : null}
     </Pressable>
   );
 }
 
-/** Feed post in the "social" layout: rounded media card with overlays and an action cut-out. */
+/**
+ * Feed post: rounded media card with the author on top and one see-through action bar at the
+ * bottom (like count lives next to the heart), then a two-line caption underneath.
+ */
 export const FeedPostCard = memo(function FeedPostCard({
   story,
   active,
   liked,
-  likedBy,
+  saved,
   onOpen,
   onOpenAuthor,
   onToggleLike,
+  onToggleSave,
   onComment,
   onShare,
-  onReact,
   onMore,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
@@ -66,9 +75,7 @@ export const FeedPostCard = memo(function FeedPostCard({
   if (!author) return null;
 
   const coAuthors = story.coAuthorIds.map(getAuthor).filter((a): a is Author => !!a);
-  const byline = [author, ...coAuthors].map((a) => a.name).join(', ');
   const likes = story.likes + (liked ? 1 : 0);
-  const reactors = likedBy.slice(0, 2);
 
   return (
     <View style={styles.wrap}>
@@ -83,173 +90,147 @@ export const FeedPostCard = memo(function FeedPostCard({
           style={StyleSheet.absoluteFill}
         />
 
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={`${author.name}${author.verified ? ', verified' : ''}. Open profile`}
-          onPress={() => onOpenAuthor(author.id)}
-          style={styles.authorRow}
-        >
-          <View style={styles.avatarRing}>
-            <Avatar name={author.name} uri={author.avatarUrl} tone={author.tone} size={40} />
-          </View>
-          <View style={styles.authorText}>
-            <View style={styles.nameRow}>
-              <AppText variant="heading" color="textInverse" numberOfLines={1} style={styles.shadowText}>
-                {author.handle}
-              </AppText>
-              {author.verified ? <VerifiedBadge size={15} /> : null}
-            </View>
-            <View style={styles.nameRow}>
-              <Ionicons name="people-outline" size={13} color={colors.onBrand} />
-              <AppText variant="caption" color="textInverse" numberOfLines={1} style={[styles.shadowText, styles.byline]}>
-                {byline}
-              </AppText>
-            </View>
-          </View>
-        </Pressable>
-
-        <View style={styles.topActions}>
-          <GlassButton tone="light" size={36} icon="expand-outline" iconSize={17} accessibilityLabel="Open full screen" onPress={() => onOpen(story)} />
-          <GlassButton tone="light" size={36} icon="ellipsis-vertical" iconSize={17} accessibilityLabel="More options" onPress={() => onMore(story)} />
-        </View>
-
-        {reactors.length > 0 ? (
-          <View style={styles.reactors} pointerEvents="none">
-            {reactors.map((p) => (
-              <View key={p.id} style={styles.reactor}>
-                <Avatar name={p.name} uri={p.avatarUrl} tone={p.tone} size={26} />
-                <View style={styles.reactorHeart}>
-                  <Ionicons name="heart" size={8} color={colors.onBrand} />
-                </View>
+        <View style={styles.topRow} pointerEvents="box-none">
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`${author.name}${author.verified ? ', verified' : ''}. Open profile`}
+            onPress={() => onOpenAuthor(author.id)}
+            style={({ pressed }) => [styles.authorChip, pressed && styles.pressed]}
+          >
+            <Avatar name={author.name} uri={author.avatarUrl} tone={author.tone} size={32} />
+            <View style={styles.authorText}>
+              <View style={styles.nameRow}>
+                <AppText variant="label" color="textInverse" numberOfLines={1}>
+                  {author.handle}
+                </AppText>
+                {author.verified ? <VerifiedBadge size={14} /> : null}
               </View>
-            ))}
-          </View>
-        ) : null}
+              {coAuthors.length > 0 ? (
+                <AppText variant="caption" numberOfLines={1} style={styles.byline}>
+                  with {coAuthors.map((a) => a.name).join(', ')}
+                </AppText>
+              ) : null}
+            </View>
+          </Pressable>
 
-        <View style={styles.notch}>
-          <NotchAction
-            icon={liked ? 'heart' : 'heart-outline'}
-            color={liked ? colors.like : colors.text}
-            label={liked ? 'Unlike' : 'Like'}
-            selected={liked}
-            onPress={() => onToggleLike(story.id)}
-          />
-          <NotchAction icon="chatbubble-outline" label={`Comments, ${story.comments}`} onPress={() => onComment(story)} />
-          <NotchAction icon="paper-plane-outline" label="Share" onPress={() => onShare(story)} />
-          <NotchAction icon="happy-outline" label="React" onPress={() => onReact(story)} />
+          <View style={styles.topActions}>
+            <GlassButton tone="shade" size={40} icon="expand-outline" iconSize={18} accessibilityLabel="Open full screen" onPress={() => onOpen(story)} />
+            <GlassButton tone="shade" size={40} icon="ellipsis-horizontal" iconSize={18} accessibilityLabel="More options" onPress={() => onMore(story)} />
+          </View>
         </View>
 
-        <View style={styles.likedPill} accessible accessibilityLabel={`${formatCount(likes)} likes`}>
-          {likedBy.length > 0 ? <AvatarStack people={likedBy.slice(0, 3)} size={22} /> : null}
-          <AppText variant="micro" allowFontScaling={false}>
-            {formatCount(likes)} Liked
-          </AppText>
+        <View style={styles.bottomRow} pointerEvents="box-none">
+          <View style={styles.pill}>
+            <PillAction
+              icon={liked ? 'heart' : 'heart-outline'}
+              color={liked ? colors.likeOnDark : colors.onBrand}
+              label={liked ? 'Unlike' : 'Like'}
+              count={likes}
+              selected={liked}
+              onPress={() => onToggleLike(story.id)}
+            />
+            <PillAction icon="chatbubble-outline" label="Comments" count={story.comments} onPress={() => onComment(story)} />
+            <PillAction icon="paper-plane-outline" label="Share" onPress={() => onShare(story)} />
+          </View>
+          <GlassButton
+            tone="shade"
+            size={44}
+            iconSize={20}
+            icon={saved ? 'bookmark' : 'bookmark-outline'}
+            accessibilityLabel={saved ? 'Remove from saved' : 'Save story'}
+            accessibilityState={{ selected: saved }}
+            onPress={() => onToggleSave(story.id)}
+          />
         </View>
       </View>
 
-      <View style={styles.meta}>
-        <AppText variant="caption" color="textSubtle">
-          {formatRelative(story.publishedAt)} · {story.location}
-        </AppText>
-        {likedBy.length > 0 ? (
-          <AppText variant="caption" color="textMuted" numberOfLines={1}>
-            {likedBy
-              .slice(0, 2)
-              .map((p) => `@${p.handle}`)
-              .join(', ')}{' '}
-            and others liked this post!
-          </AppText>
-        ) : null}
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        accessibilityHint={expanded ? 'Shows less of the caption' : 'Shows the full caption'}
+        onPress={() => setExpanded((e) => !e)}
+        style={styles.caption}
+      >
         <AppText variant="body" numberOfLines={expanded ? undefined : 2}>
-          <AppText variant="bodyStrong" style={styles.heavy}>@{author.handle} </AppText>
+          <AppText variant="bodyStrong" style={styles.heavy}>
+            {author.handle}{' '}
+          </AppText>
           {story.headline}
           {expanded ? `. ${story.summary}` : ''}
         </AppText>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityState={{ expanded }}
-          onPress={() => setExpanded((e) => !e)}
-          hitSlop={8}
-          style={styles.moreBtn}
-        >
-          <AppText variant="caption" color="textSubtle">
-            {expanded ? 'Show less' : '…more'}
-          </AppText>
-        </Pressable>
-      </View>
+        <AppText variant="caption" color="textSubtle">
+          {formatRelative(story.publishedAt)} · {story.location}
+        </AppText>
+      </Pressable>
     </View>
   );
 });
 
-const NOTCH_H = 54;
-
 const styles = StyleSheet.create({
-  wrap: { paddingHorizontal: spacing.lg },
+  wrap: { paddingHorizontal: spacing.lg, gap: spacing.md },
   card: {
-    height: 340,
+    height: 380,
     borderRadius: radius.xl,
     overflow: 'hidden',
     backgroundColor: colors.media,
   },
-  authorRow: {
+  topRow: {
     position: 'absolute',
-    left: spacing.md + 2,
-    top: spacing.md + 2,
-    right: 104,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm + 2,
-  },
-  avatarRing: { borderWidth: 2, borderColor: colors.onBrand, borderRadius: 24 },
-  authorText: { flexShrink: 1, gap: 2 },
-  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 5 },
-  byline: { flexShrink: 1 },
-  shadowText: { textShadowColor: 'rgba(0,0,0,0.45)', textShadowRadius: 6, textShadowOffset: { width: 0, height: 1 } },
-  topActions: { position: 'absolute', right: spacing.md + 2, top: spacing.lg, flexDirection: 'row', gap: spacing.sm },
-  reactors: { position: 'absolute', left: spacing.lg, bottom: NOTCH_H + spacing.md, gap: spacing.sm },
-  reactor: { borderWidth: 2, borderColor: colors.onBrand, borderRadius: 15 },
-  reactorHeart: {
-    position: 'absolute',
-    right: -5,
-    top: -5,
-    width: 15,
-    height: 15,
-    borderRadius: 8,
-    borderWidth: 1.5,
-    borderColor: colors.onBrand,
-    backgroundColor: colors.like,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  notch: {
-    position: 'absolute',
-    left: 0,
-    bottom: 0,
-    height: NOTCH_H,
-    paddingLeft: spacing.xs,
-    paddingRight: spacing.md,
-    paddingTop: spacing.xs,
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderTopRightRadius: 24,
-  },
-  notchBtn: { width: hitTarget, height: hitTarget, alignItems: 'center', justifyContent: 'center' },
-  likedPill: {
-    position: 'absolute',
+    left: spacing.md,
     right: spacing.md,
-    bottom: spacing.md,
-    height: 34,
+    top: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: spacing.sm,
+  },
+  authorChip: {
+    flexShrink: 1,
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
     paddingLeft: 4,
     paddingRight: spacing.md,
-    borderRadius: 17,
+    paddingVertical: 4,
+    borderRadius: radius.pill,
+    backgroundColor: colors.glassShade,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.glassShadeBorder,
+  },
+  authorText: { flexShrink: 1 },
+  nameRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  byline: { color: colors.nightText },
+  topActions: { flexDirection: 'row', gap: spacing.sm },
+  bottomRow: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    bottom: spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: colors.glassLight,
+    justifyContent: 'space-between',
   },
-  meta: { paddingHorizontal: spacing.xs, paddingTop: spacing.sm, gap: 3 },
+  pill: {
+    height: 44,
+    paddingHorizontal: spacing.xs,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 22,
+    backgroundColor: colors.glassShade,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: colors.glassShadeBorder,
+  },
+  pillAction: {
+    minWidth: 44,
+    height: 44,
+    paddingHorizontal: spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  caption: { paddingHorizontal: spacing.xs, gap: spacing.xs },
   heavy: { fontFamily: fonts.heavy },
-  moreBtn: { alignSelf: 'flex-start' },
   pressed: { opacity: 0.6 },
 });

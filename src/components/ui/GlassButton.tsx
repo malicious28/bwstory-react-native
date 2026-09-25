@@ -10,8 +10,12 @@ type Props = Omit<PressableProps, 'children' | 'style'> & {
   icon?: IoniconName;
   children?: ReactNode;
   accessibilityLabel: string;
-  /** 'dark' = white glyph on a see-through tile (over video); 'light' = dark glyph on a frosted white chip. */
-  tone?: 'dark' | 'light';
+  /**
+   * 'dark' = white glyph on a white see-through tile (over dark video);
+   * 'shade' = white glyph on a dark see-through tile (over any photo);
+   * 'light' = dark glyph on a frosted white chip.
+   */
+  tone?: 'dark' | 'shade' | 'light';
   shape?: 'circle' | 'rounded';
   size?: number;
   iconSize?: number;
@@ -39,19 +43,21 @@ export function GlassButton({
           width: size,
           height: size,
           borderRadius: shape === 'circle' ? size / 2 : 14,
-          backgroundColor: tone === 'dark' ? colors.glass : colors.glassLight,
+          backgroundColor: tone === 'dark' ? colors.glass : tone === 'shade' ? colors.glassShade : colors.glassLight,
         },
+        tone === 'shade' && styles.shadeBorder,
         pressed && styles.pressed,
         style,
       ]}
       {...rest}
     >
-      {children ?? (icon ? <Ionicons name={icon} size={iconSize} color={tone === 'dark' ? colors.onBrand : colors.text} /> : null)}
+      {children ?? (icon ? <Ionicons name={icon} size={iconSize} color={tone === 'light' ? colors.text : colors.onBrand} /> : null)}
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   base: { alignItems: 'center', justifyContent: 'center' },
+  shadeBorder: { borderWidth: StyleSheet.hairlineWidth, borderColor: colors.glassShadeBorder },
   pressed: { opacity: 0.65 },
 });
