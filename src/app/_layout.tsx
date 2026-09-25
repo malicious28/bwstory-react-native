@@ -1,29 +1,33 @@
+import { DMSerifDisplay_400Regular } from '@expo-google-fonts/dm-serif-display';
 import {
-  SourceSans3_400Regular,
-  SourceSans3_500Medium,
-  SourceSans3_600SemiBold,
-  SourceSans3_700Bold,
+  Figtree_400Regular,
+  Figtree_500Medium,
+  Figtree_600SemiBold,
+  Figtree_700Bold,
+  Figtree_800ExtraBold,
   useFonts,
-} from '@expo-google-fonts/source-sans-3';
+} from '@expo-google-fonts/figtree';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { KeyboardProvider } from 'react-native-keyboard-controller';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { ToastProvider } from '@/components/ui';
 import { ProfileProvider } from '@/features/profile/ProfileContext';
+import { SocialProvider } from '@/features/social/SocialContext';
 import { colors } from '@/theme';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    SourceSans3_400Regular,
-    SourceSans3_500Medium,
-    SourceSans3_600SemiBold,
-    SourceSans3_700Bold,
+    Figtree_400Regular,
+    Figtree_500Medium,
+    Figtree_600SemiBold,
+    Figtree_700Bold,
+    Figtree_800ExtraBold,
+    DMSerifDisplay_400Regular,
   });
   const ready = fontsLoaded || fontError != null;
 
@@ -38,12 +42,25 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <KeyboardProvider>
         <ProfileProvider>
-          <ToastProvider>
-            <StatusBar style="light" />
-            <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
-              <Stack.Screen name="(tabs)" />
-            </Stack>
-          </ToastProvider>
+          <SocialProvider>
+            <ToastProvider>
+              <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}>
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen
+                  name="discover/video/index"
+                  options={{ animation: 'fade_from_bottom', contentStyle: { backgroundColor: colors.night } }}
+                />
+                <Stack.Screen
+                  name="discover/video/user"
+                  options={{ animation: 'slide_from_right', contentStyle: { backgroundColor: colors.night } }}
+                />
+                <Stack.Screen
+                  name="profile/edit"
+                  options={{ animation: 'slide_from_bottom', contentStyle: { backgroundColor: colors.night } }}
+                />
+              </Stack>
+            </ToastProvider>
+          </SocialProvider>
         </ProfileProvider>
       </KeyboardProvider>
     </SafeAreaProvider>

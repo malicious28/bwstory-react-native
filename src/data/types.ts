@@ -1,16 +1,23 @@
 export type Author = {
   id: string;
   name: string;
+  handle: string;
+  verified: boolean;
+  bio: string;
+  location: string;
+  followers: number;
+  following: number;
+  /** Background tone for the initials avatar. */
+  tone: string;
   avatarUrl?: string | null;
 };
 
-export const CATEGORIES = ['All', 'Local', 'India', 'Business', 'Tech', 'Sports'] as const;
-export type Category = (typeof CATEGORIES)[number];
-
 export type Story = {
   id: string;
-  author: Author;
-  category: Exclude<Category, 'All'>;
+  authorId: string;
+  coAuthorIds: string[];
+  /** Short topic chip shown on the full-screen player, e.g. "Noida Metro". */
+  tag: string;
   headline: string;
   summary: string;
   location: string;
@@ -18,6 +25,7 @@ export type Story = {
   views: number;
   likes: number;
   comments: number;
+  shares: number;
   videoUrl: string;
   posterUrl: string;
 };

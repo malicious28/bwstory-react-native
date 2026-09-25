@@ -1,271 +1,108 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
-import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import { useRef, useState, type RefObject } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, View, type TextInput } from 'react-native';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-controller';
+import { ActivityIndicator, Share, StyleSheet, View } from 'react-native';
 
-import { GenderField } from '@/components/profile/GenderField';
-import { ProfileCover } from '@/components/profile/ProfileCover';
-import { AppHeader, AppText, Button, IconButton, TextField, useToast } from '@/components/ui';
+import { BioCard } from '@/components/profile/BioCard';
+import { ProfileActions } from '@/components/profile/ProfileActions';
+import { ProfileIdentity } from '@/components/profile/ProfileIdentity';
+import { ProfilePage } from '@/components/profile/ProfilePage';
+import { ProfileStats } from '@/components/profile/ProfileStats';
+import { AppText, Button, GlassButton, useToast } from '@/components/ui';
 import { useProfile } from '@/features/profile/ProfileContext';
-import { persistPhoto, removePhoto } from '@/features/profile/storage';
-import { useProfileForm } from '@/features/profile/useProfileForm';
-import { LIMITS, type Profile, type ProfileField } from '@/features/profile/validation';
-import { countWords } from '@/lib/format';
-import { haptics } from '@/lib/haptics';
-import { colors, spacing } from '@/theme';
+import { useSocial } from '@/features/social/SocialContext';
+import { colors, radius, spacing } from '@/theme';
 
-const MAX_PHOTO_BYTES = 10 * 1024 * 1024;
+/** "rashmi desai" → "rashmi.desai" (display only; handles aren't editable yet). */
+function handleFrom(name: string): string {
+  return (
+    name
+      .toLowerCase()
+      .normalize('NFKD')
+      .replace(/[^a-z0-9\s.]/g, '')
+      .trim()
+      .replace(/\s+/g, '.') || 'you'
+  );
+}
 
-export default function ProfileScreen() {
-  const { profile, loaded, update } = useProfile();
+/** Route: /profile (the signed-in user's own profile, same layout as creator pages). */
+export default function MyProfile() {
+  const { profile, loaded } = useProfile();
+  const { followingCount } = useSocial();
+  const toast = useToast();
 
   if (!loaded) {
     return (
-      <View style={styles.screen}>
-        <AppHeader />
-        <View style={styles.loading}>
-          <ActivityIndicator color={colors.brand} size="large" />
-        </View>
+      <View style={styles.loading}>
+        <ActivityIndicator color={colors.onBrand} size="large" />
       </View>
     );
   }
-  return <ProfileEditor saved={profile} onSave={update} />;
-}
 
-function ProfileEditor({ saved, onSave }: { saved: Profile; onSave: (p: Profile) => Promise<void> }) {
-  const toast = useToast();
-  const form = useProfileForm(saved);
-  const { draft, setField, blurField, errors } = form;
-
-  const [saving, setSaving] = useState(false);
-  const [photoBusy, setPhotoBusy] = useState(false);
-
-  const nameRef = useRef<TextInput>(null);
-  const locationRef = useRef<TextInput>(null);
-  const professionRef = useRef<TextInput>(null);
-  const bioRef = useRef<TextInput>(null);
-  const refs: Partial<Record<ProfileField, RefObject<TextInput | null>>> = {
-    name: nameRef,
-    location: locationRef,
-    profession: professionRef,
-    bio: bioRef,
-  };
-
-  const bioWords = countWords(draft.bio);
-
-  /** Drop a picked-but-unsaved photo file so it doesn't linger on disk. */
-  const discardDraftPhoto = (keep: string | null) => {
-    if (draft.photoUri && draft.photoUri !== saved.photoUri && draft.photoUri !== keep) removePhoto(draft.photoUri);
-  };
-
-  const pickPhoto = async () => {
-    setPhotoBusy(true);
+  const handle = handleFrom(profile.name);
+  const editProfile = () => router.push('/profile/edit');
+  const shareProfile = async () => {
     try {
-      // The system photo picker needs no storage permission, so none is requested.
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ['images'],
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 0.8,
-      });
-      const asset = result.canceled ? null : result.assets?.[0];
-      if (!asset) return;
-      if (asset.mimeType && !asset.mimeType.startsWith('image/')) {
-        toast('Please choose an image file', 'error');
-        return;
-      }
-      if (asset.fileSize && asset.fileSize > MAX_PHOTO_BYTES) {
-        toast('That photo is over 10 MB. Please pick a smaller one.', 'error');
-        return;
-      }
-      const uri = await persistPhoto(asset.uri);
-      discardDraftPhoto(uri);
-      setField('photoUri', uri);
+      await Share.share({ message: `${profile.name} (@${handle}) on BWStory` });
     } catch {
-      toast('Couldn’t load that photo. Please try another.', 'error');
-    } finally {
-      setPhotoBusy(false);
+      toast('Couldn’t open the share sheet', 'error');
     }
-  };
-
-  const onChangePhoto = () => {
-    if (!draft.photoUri) {
-      pickPhoto();
-      return;
-    }
-    Alert.alert('Profile photo', undefined, [
-      { text: 'Choose a new photo', onPress: pickPhoto },
-      {
-        text: 'Remove photo',
-        style: 'destructive',
-        onPress: () => {
-          discardDraftPhoto(null);
-          setField('photoUri', null);
-        },
-      },
-      { text: 'Cancel', style: 'cancel' },
-    ]);
-  };
-
-  const save = async () => {
-    const result = form.submit();
-    if (!result.ok) {
-      haptics.warning();
-      toast('Please fix the highlighted fields', 'error');
-      refs[result.firstError]?.current?.focus();
-      return;
-    }
-    setSaving(true);
-    try {
-      await onSave(result.profile);
-      haptics.success();
-      toast('Profile updated', 'success');
-    } catch {
-      toast('Couldn’t save your changes. Please try again.', 'error');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const goBack = () => {
-    const leave = () => (router.canGoBack() ? router.back() : router.navigate('/'));
-    if (!form.dirty) {
-      leave();
-      return;
-    }
-    Alert.alert('Discard changes?', 'Your edits haven’t been saved.', [
-      { text: 'Keep editing', style: 'cancel' },
-      {
-        text: 'Discard',
-        style: 'destructive',
-        onPress: () => {
-          discardDraftPhoto(null);
-          form.reset(saved);
-          leave();
-        },
-      },
-    ]);
   };
 
   return (
-    <View style={styles.screen}>
-      <AppHeader
-        left={<IconButton icon="chevron-back" size={26} color={colors.onBrand} accessibilityLabel="Go back" onPress={goBack} />}
-        center={
-          <AppText variant="heading" color="textInverse" accessibilityRole="header" style={styles.srOnly}>
-            Edit profile
-          </AppText>
-        }
-        right={
-          <Button
-            label="Update Account"
-            variant="onBrand"
-            loading={saving}
-            disabled={!form.dirty}
-            onPress={save}
-            accessibilityHint={form.dirty ? 'Saves your profile changes' : 'No changes to save yet'}
-          />
-        }
+    <ProfilePage
+      name={profile.name}
+      coverUri={profile.photoUri}
+      topRight={<GlassButton icon="create-outline" accessibilityLabel="Edit profile" onPress={editProfile} />}
+    >
+      <ProfileIdentity name={profile.name} handle={handle} />
+      <ProfileActions
+        primaryLabel="Edit profile"
+        onPrimary={editProfile}
+        primaryHint="Update your photo, name and bio"
+        secondaryIcon="share-social-outline"
+        secondaryLabel="Share your profile"
+        onSecondary={shareProfile}
       />
-
-      <KeyboardAwareScrollView
-        bottomOffset={spacing.xxxl}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.content}
-      >
-        <ProfileCover name={draft.name} photoUri={draft.photoUri} busy={photoBusy} onChangePhoto={onChangePhoto} />
-
-        <View style={styles.form}>
-          <TextField
-            ref={nameRef}
-            label="Name"
-            value={draft.name}
-            onChangeText={(t) => setField('name', t)}
-            onBlur={() => blurField('name')}
-            error={errors.name}
-            maxLength={LIMITS.name + 10}
-            autoCapitalize="words"
-            autoComplete="name"
-            textContentType="name"
-            returnKeyType="next"
-            submitBehavior="submit"
-            onSubmitEditing={() => locationRef.current?.focus()}
-          />
-
-          <GenderField value={draft.gender} onChange={(g) => setField('gender', g)} error={errors.gender} />
-
-          <TextField
-            ref={locationRef}
-            label="Location"
-            placeholder="City or neighbourhood"
-            value={draft.location}
-            onChangeText={(t) => setField('location', t)}
-            onBlur={() => blurField('location')}
-            error={errors.location}
-            maxLength={LIMITS.location + 10}
-            autoCapitalize="words"
-            autoComplete="postal-address-locality"
-            textContentType="addressCity"
-            returnKeyType="next"
-            submitBehavior="submit"
-            onSubmitEditing={() => professionRef.current?.focus()}
-          />
-
-          <TextField
-            ref={professionRef}
-            label="Profession"
-            placeholder="What do you do?"
-            value={draft.profession}
-            onChangeText={(t) => setField('profession', t)}
-            onBlur={() => blurField('profession')}
-            error={errors.profession}
-            maxLength={LIMITS.profession + 10}
-            autoCapitalize="sentences"
-            textContentType="jobTitle"
-            returnKeyType="next"
-            submitBehavior="submit"
-            onSubmitEditing={() => bioRef.current?.focus()}
-          />
-
-          <TextField
-            ref={bioRef}
-            label="Bio"
-            placeholder="Tell readers a little about yourself"
-            value={draft.bio}
-            onChangeText={(t) => setField('bio', t)}
-            onBlur={() => blurField('bio')}
-            error={errors.bio}
-            multiline
-            maxLength={LIMITS.bioChars}
-            counter={`${bioWords}/${LIMITS.bioWords} words`}
-            counterExceeded={bioWords > LIMITS.bioWords}
-            autoCapitalize="sentences"
-          />
-
-          <Button label="Save changes" loading={saving} disabled={!form.dirty} onPress={save} style={styles.saveBottom} />
-
-          <View style={styles.privacy}>
-            <Ionicons name="lock-closed-outline" size={14} color={colors.textSubtle} />
-            <AppText variant="caption" color="textSubtle" style={styles.privacyText}>
-              Your profile is stored only on this device.
-            </AppText>
-          </View>
+      <ProfileStats
+        stats={[
+          { label: 'Following', value: followingCount },
+          { label: 'Followers', value: 0 },
+          { label: 'Stories', value: 0 },
+        ]}
+      />
+      <BioCard
+        bio={profile.bio}
+        meta={[
+          { icon: 'briefcase-outline', label: profile.profession },
+          { icon: 'location-outline', label: profile.location },
+        ]}
+      />
+      <View style={styles.section}>
+        <AppText variant="heading" color="textInverse">
+          Your stories
+        </AppText>
+        <View style={styles.empty}>
+          <AppText variant="body" style={styles.emptyText}>
+            You haven’t posted a story yet. Share what’s happening around you.
+          </AppText>
+          <Button label="Create your first story" variant="outline" compact onPress={() => router.navigate('/create')} style={styles.emptyBtn} />
         </View>
-      </KeyboardAwareScrollView>
-    </View>
+      </View>
+    </ProfilePage>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.surface },
-  loading: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  content: { paddingBottom: spacing.xxxl },
-  form: { paddingHorizontal: spacing.xl, paddingTop: spacing.lg, gap: spacing.xl },
-  saveBottom: { marginTop: spacing.sm },
-  privacy: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: spacing.xs },
-  privacyText: { textAlign: 'center' },
-  // Reference layout has no visible title; keep one for screen readers.
-  srOnly: { position: 'absolute', width: 1, height: 1, opacity: 0 },
+  loading: { flex: 1, backgroundColor: colors.night, alignItems: 'center', justifyContent: 'center' },
+  section: { gap: spacing.md, paddingTop: spacing.xs },
+  empty: {
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.xl,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.nightBorder,
+  },
+  emptyText: { color: colors.nightMuted, textAlign: 'center' },
+  emptyBtn: { backgroundColor: colors.onBrand, borderColor: colors.onBrand },
 });

@@ -12,41 +12,82 @@ type Props = Omit<TextInputProps, 'style'> & {
   /** Shown bottom-right, e.g. "42/120 words". */
   counter?: string;
   counterExceeded?: boolean;
+  /** 'dark' for fields on the night surfaces (profile pages). */
+  tone?: 'light' | 'dark';
   ref?: Ref<TextInput>;
 };
+
+const PALETTE = {
+  light: {
+    label: colors.textMuted,
+    text: colors.text,
+    placeholder: colors.textSubtle,
+    bg: colors.field,
+    bgFocus: colors.surface,
+    border: 'transparent',
+    borderFocus: colors.brand,
+    cursor: colors.brand,
+    error: colors.danger,
+    errorBg: colors.dangerSoft,
+    counter: colors.textSubtle,
+  },
+  dark: {
+    label: colors.nightMuted,
+    text: colors.onBrand,
+    placeholder: colors.nightMuted,
+    bg: colors.nightField,
+    bgFocus: 'rgba(255,255,255,0.12)',
+    border: colors.nightBorder,
+    borderFocus: colors.onBrand,
+    cursor: colors.onBrand,
+    error: colors.nightDanger,
+    errorBg: 'rgba(255,180,171,0.08)',
+    counter: colors.nightMuted,
+  },
+} as const;
 
 /**
  * Labelled input with inline error below the field (announced politely to screen readers).
  */
-export function TextField({ label, error, counter, counterExceeded, multiline, onFocus, onBlur, ref, ...rest }: Props) {
+export function TextField({
+  label,
+  error,
+  counter,
+  counterExceeded,
+  multiline,
+  tone = 'light',
+  onFocus,
+  onBlur,
+  ref,
+  ...rest
+}: Props) {
   const [focused, setFocused] = useState(false);
   const hasError = !!error;
+  const p = PALETTE[tone];
 
   return (
     <View style={styles.wrap}>
-      <AppText variant="label" color="textMuted" nativeID={`${label}-label`}>
+      <AppText variant="label" style={{ color: p.label }}>
         {label}
       </AppText>
       <View
         style={[
           styles.box,
-          multiline && styles.boxMultiline,
-          focused && styles.boxFocused,
-          hasError && styles.boxError,
+          { backgroundColor: focused ? p.bgFocus : p.bg, borderColor: focused ? p.borderFocus : p.border },
+          hasError && { borderColor: p.error, backgroundColor: p.errorBg },
         ]}
       >
         <TextInput
           ref={ref}
           accessibilityLabel={label}
-          accessibilityLabelledBy={`${label}-label`}
           accessibilityHint={hasError ? error : undefined}
-          placeholderTextColor={colors.textSubtle}
-          selectionColor={colors.brand}
-          cursorColor={colors.brand}
+          placeholderTextColor={p.placeholder}
+          selectionColor={p.cursor}
+          cursorColor={p.cursor}
           multiline={multiline}
           textAlignVertical={multiline ? 'top' : 'center'}
           maxFontSizeMultiplier={1.4}
-          style={[styles.input, multiline && styles.inputMultiline]}
+          style={[styles.input, { color: p.text }, multiline && styles.inputMultiline]}
           onFocus={(e) => {
             setFocused(true);
             onFocus?.(e);
@@ -58,15 +99,15 @@ export function TextField({ label, error, counter, counterExceeded, multiline, o
           {...rest}
         />
         {counter ? (
-          <AppText variant="caption" color={counterExceeded ? 'danger' : 'textSubtle'} style={styles.counter}>
+          <AppText variant="caption" style={[styles.counter, { color: counterExceeded ? p.error : p.counter }]}>
             {counter}
           </AppText>
         ) : null}
       </View>
       {hasError ? (
         <View style={styles.errorRow} accessibilityLiveRegion="polite">
-          <Ionicons name="alert-circle" size={16} color={colors.danger} />
-          <AppText variant="caption" color="danger" style={styles.errorText}>
+          <Ionicons name="alert-circle" size={16} color={p.error} />
+          <AppText variant="caption" style={[styles.errorText, { color: p.error }]}>
             {error}
           </AppText>
         </View>
@@ -77,24 +118,15 @@ export function TextField({ label, error, counter, counterExceeded, multiline, o
 
 const styles = StyleSheet.create({
   wrap: { gap: spacing.sm },
-  box: {
-    backgroundColor: colors.field,
-    borderRadius: radius.sm,
-    borderWidth: 1.5,
-    borderColor: 'transparent',
-  },
-  boxMultiline: { backgroundColor: colors.surface, borderColor: colors.border },
-  boxFocused: { borderColor: colors.brand, backgroundColor: colors.surface },
-  boxError: { borderColor: colors.danger, backgroundColor: colors.dangerSoft },
+  box: { borderRadius: radius.md, borderWidth: 1.5 },
   input: {
-    minHeight: 48,
+    minHeight: 52,
     paddingHorizontal: spacing.lg,
     fontFamily: fonts.regular,
     fontSize: 16,
-    color: colors.text,
   },
   inputMultiline: {
-    minHeight: 120,
+    minHeight: 128,
     paddingTop: spacing.md,
     paddingBottom: spacing.xxxl,
     lineHeight: 23,

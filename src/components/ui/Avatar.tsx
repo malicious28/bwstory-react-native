@@ -25,17 +25,19 @@ type Props = {
   name: string;
   uri?: string | null;
   size?: number;
+  /** Override the name-derived background tone. */
+  tone?: string;
   style?: StyleProp<ViewStyle>;
 };
 
 /** Photo avatar with an initials fallback; decorative, so hidden from screen readers. */
-export function Avatar({ name, uri, size = 36, style }: Props) {
+export function Avatar({ name, uri, size = 36, tone, style }: Props) {
   const box = { width: size, height: size, borderRadius: size / 2 };
   return (
     <View
       accessible={false}
       importantForAccessibility="no-hide-descendants"
-      style={[styles.base, box, { backgroundColor: toneFor(name) }, style]}
+      style={[styles.base, box, { backgroundColor: tone ?? toneFor(name) }, style]}
     >
       {uri ? (
         <Image source={{ uri }} style={box} contentFit="cover" transition={150} />
