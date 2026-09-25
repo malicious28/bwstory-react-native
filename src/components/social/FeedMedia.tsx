@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { isSafeMediaUrl } from '@/lib/url';
@@ -28,15 +28,13 @@ export function FeedMedia({ posterUrl, videoUrl, preview }: Props) {
 
 function SilentPreview({ uri }: { uri: string }) {
   const [ready, setReady] = useState(false);
+  // Playback starts in setup; no pause-on-unmount: useVideoPlayer releases the player
+  // itself when this unmounts, and touching a released player throws.
   const player = useVideoPlayer(uri, (p) => {
     p.loop = true;
     p.muted = true;
+    p.play();
   });
-
-  useEffect(() => {
-    player.play();
-    return () => player.pause();
-  }, [player]);
 
   return (
     <VideoView
